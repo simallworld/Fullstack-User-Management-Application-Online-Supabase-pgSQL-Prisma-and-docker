@@ -59,3 +59,96 @@ export const getUsers = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Get one user or user by ID
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid user Id",
+      });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!user) {
+      res.status(404).json({
+        success: true,
+        message: "User not found!!",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Fetched user",
+      data: user,
+    });
+  } catch (err) {
+    console.error(err);
+
+    res.status(404).json({
+      success: false,
+      message: "Failed to fetch User",
+    });
+  }
+};
+
+// Update User
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid user Id",
+      });
+    }
+
+    const { name, email, age } = req.body;
+
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        name,
+        email,
+        age: age !== undefined ? Number(age) : null,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Updated user successfully!!",
+      data: updatedUser,
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(404).json({
+      success: true,
+      message: "Failed to update user",
+    });
+  }
+};
