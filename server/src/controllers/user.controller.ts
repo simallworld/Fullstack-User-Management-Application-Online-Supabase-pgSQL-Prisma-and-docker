@@ -152,3 +152,48 @@ export const updateUser = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Delete User
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid user Id",
+      });
+    }
+
+    const existedUser = await prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!existedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await prisma.user.delete({
+      where: {
+        id,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+    });
+  } catch (err) {
+    console.error(err);
+
+    return res.status(404).json({
+      success: false,
+      message: "Failed to delete the user",
+    });
+  }
+};
