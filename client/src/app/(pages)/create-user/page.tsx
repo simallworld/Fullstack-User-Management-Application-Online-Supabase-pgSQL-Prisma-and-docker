@@ -1,4 +1,4 @@
-import UserForm from "@/components/UserForm";
+import CreateUser from "../../components/CreateUser";
 import Link from "next/link";
 import React from "react";
 
@@ -18,7 +18,7 @@ const page = () => {
         </Link>
       </div>
       <div>
-        <UserForm />
+        <CreateUser />
       </div>
     </div>
   );

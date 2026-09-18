@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/+$/, "");
+import { deleteUser, getUsers, updateUser } from "../services/user.service";
 
 const DisplayUsers = () => {
   const [userData, setUserData] = useState([]);
@@ -21,9 +20,8 @@ const DisplayUsers = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await fetch(BASE_URL);
-        const response = await result.json();
-        setUserData(response.data);
+        const users = await getUsers();
+        setUserData(users);
         setLoading(false);
       } catch (err) {
         console.error(err)
@@ -37,10 +35,8 @@ const DisplayUsers = () => {
 
   const handleDelete = async (id) => {
     try {
-      await fetch(`${BASE_URL}/${id}`, {
-        method: "DELETE"
-      })
-      setUserData(userData.filter((user) => user.id !== id))
+      await deleteUser(id);
+      setUserData((users) => users.filter((user) => user.id !== id));
     } catch (err) {
       console.error(err)
     }
@@ -59,23 +55,15 @@ const DisplayUsers = () => {
     setIsUpdating(true);
 
     try {
-      const result = await fetch(`${BASE_URL}/${selectedUserId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      const updatedUser = await updateUser(selectedUserId, {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        age: formData.age ? Number(formData.age) : undefined,
       });
-
-      const response = await result.json();
-
-      if (!result.ok) {
-        throw new Error(response.message || "Failed to update user");
-      }
 
       setUserData((users) =>
         users.map((user) =>
-          user.id === selectedUserId ? response.data : user,
+          user.id === selectedUserId ? updatedUser : user,
         ),
       );
       setFormData({ name: "", email: "", age: "" });

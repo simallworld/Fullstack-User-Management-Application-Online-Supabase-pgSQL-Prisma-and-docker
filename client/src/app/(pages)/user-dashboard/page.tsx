@@ -1,4 +1,4 @@
-import DisplayUsers from "@/components/DisplayUsers";
+import DisplayUsers from "../../components/DisplayUsers";
 import Link from "next/link";
 import React from "react";
 

@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "src/components/DisplayUsers.jsx", "src/components/UserForm.jsx"  ],
+, "src/app/components/DisplayUsers.jsx", "src/app/components/CreateUser.jsx"  ],
   "exclude": ["node_modules"]
 }

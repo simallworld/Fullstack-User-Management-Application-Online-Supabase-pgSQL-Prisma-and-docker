@@ -1,33 +1,44 @@
 "use client";
 import React, { useState } from "react";
+import { createUser } from "../services/user.service";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const initialFormData = {
+  name: "",
+  email: "",
+  age: "",
+};
 
 const UserForm = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    age: ""
-  });
+  const [formData, setFormData] = useState(initialFormData);
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  }
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((currentData) => ({
+      ...currentData,
+      [name]: value,
+    }));
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+    setIsCreating(true);
 
-    const result = await fetch(BASE_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
+    try {
+      await createUser({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        age: formData.age ? Number(formData.age) : undefined,
+      });
 
-    await result.json();
-    setFormData({ name: "", email: "", age: "" });
+      setFormData(initialFormData);
+    } catch (requestError) {
+      setError(requestError.message || "Failed to create user");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -43,8 +54,9 @@ const UserForm = () => {
               name="name"
               placeholder="Enter your name"
               id="name"
+              required
               onChange={handleChange}
-              className="p-1"
+              className="p-1 border-b-3 rounded-md border-orange-600"
               value={formData.name}
             />
           </div>
@@ -57,8 +69,9 @@ const UserForm = () => {
               name="email"
               placeholder="Enter your email"
               id="email"
+              required
               onChange={handleChange}
-              className="p-1"
+              className="p-1 border-b-3 rounded-md border-orange-600"
               value={formData.email}
             />
           </div>
@@ -67,20 +80,23 @@ const UserForm = () => {
               Age
             </label>
             <input
-              type="text"
+              type="number"
               name="age"
               placeholder="Enter your Age"
               id="age"
               onChange={handleChange}
-              className="p-1"
+              className="p-1 border-b-3 rounded-md border-orange-600"
               value={formData.age}
             />
           </div>
+
+          {error && <p className="text-sm text-white">{error}</p>}
           <button
             type="submit"
-            className="mt-3 p-3 rounded shadow-2xl border-4 text-white font-bold border-white cursor-pointer hover:bg-white hover:text-black hover:scale-102 duration-200"
+            disabled={isCreating}
+            className="mt-6 p-3 rounded shadow-2xl border-4 border-white text-white font-bold cursor-pointer hover:bg-white hover:text-orange-600 hover:scale-102 duration-200"
           >
-            Create User
+            {isCreating ? "Creating..." : "Create User"}
           </button>
         </div>
       </form>
