@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+
+    container_name: userManagement-backend
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - ./server/.env
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8000/api/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+
+    container_name: userManagement-frontend
+    hostname: frontend
+    ports:
+      - "3000:3000"
+
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    restart: unless-stopped
